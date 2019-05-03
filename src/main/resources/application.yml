@@ -1,4 +1,20 @@
 spring:
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  jpa:
+    show-sql: true
+    database: mysql
+    hibernate:
+      ddl-auto: none
+  datasource:
+#    url: jdbc:mysql://mysql:3306/registry_mgr?useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://192.168.1.106:3306/registry_mgr?useSSL=false&characterEncoding=utf-8&allowPublicKeyRetrieval=true
+    username: toor
+    password: jnEhO5Dhk7U5ou9GFs95dmPdwrmVhigC
+    driver-class-name: com.mysql.cj.jdbc.Driver
   messages:
     basename: i18n/Messages,i18n/Pages
   jms:

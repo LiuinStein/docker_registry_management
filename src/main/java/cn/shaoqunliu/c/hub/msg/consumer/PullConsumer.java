@@ -11,7 +11,7 @@ public class PullConsumer {
 
     @JmsListener(destination = "registry.pull.queue")
     public void receiveMsg(RegistryMessage message) {
-        // ignore all of the messages from pull queue
+        // ignores all of the messages from pull queue
         // this queue is designed and reserved for the future functions
         // which is not included in current application
     }
