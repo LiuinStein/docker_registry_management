@@ -26,6 +26,13 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
     }
 
     @Override
+    public Boolean isOpened(String namespace, String repository) {
+        Objects.requireNonNull(namespace);
+        Objects.requireNonNull(repository);
+        return repositoryDetailsRepository.getOpenedByIdentifier(namespace, repository);
+    }
+
+    @Override
     public DockerRepository save(DockerRepository repository) {
         // the return value of method save will never be null
         return repositoryDetailsRepository.save(repository);

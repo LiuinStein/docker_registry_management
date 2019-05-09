@@ -6,5 +6,7 @@ public interface DockerRepositoryService {
 
     DockerRepository getDockerRepositoryByIdentifier(String namespace, String repository);
 
+    Boolean isOpened(String namespace, String repository);
+
     DockerRepository save(DockerRepository repository);
 }
