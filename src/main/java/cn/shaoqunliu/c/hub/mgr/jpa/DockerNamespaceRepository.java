@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface DockerNamespaceRepository extends JpaRepository<DockerNamespace, Integer> {
 
     DockerNamespace getDockerNamespaceByName(String name);
+
+    Boolean existsByName(String name);
 }
