@@ -1,5 +1,6 @@
 package cn.shaoqunliu.c.hub.mgr.controller;
 
+import cn.shaoqunliu.c.hub.mgr.exception.PageNumberOutOfRangeException;
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsException;
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
@@ -16,8 +17,11 @@ public class ControllerExceptionHandler {
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(ConstraintViolationException.class)
-    public RestfulResult constraintViolationException(ConstraintViolationException e) {
+    @ExceptionHandler(value = {
+            ConstraintViolationException.class,
+            PageNumberOutOfRangeException.class
+    })
+    public RestfulResult constraintViolationException(Exception e) {
         return new RestfulResult(HttpStatus.BAD_REQUEST.value(), e.getMessage());
     }
 
