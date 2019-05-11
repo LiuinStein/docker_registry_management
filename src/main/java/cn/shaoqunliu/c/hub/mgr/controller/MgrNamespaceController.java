@@ -1,8 +1,11 @@
 package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsException;
+import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
+import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.security.token.MgrAuthenticationToken;
 import cn.shaoqunliu.c.hub.mgr.service.DockerNamespaceService;
+import cn.shaoqunliu.c.hub.mgr.validation.ParameterValidationConstraints;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Pattern;
+import java.util.Collections;
 import java.util.Objects;
 
 @Validated
@@ -30,7 +34,7 @@ public class MgrNamespaceController {
     @RequestMapping(value = "/{namespace}", method = RequestMethod.POST, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     public RestfulResult addNamespace(@PathVariable("namespace")
-                                      @Pattern(regexp = "[a-zA-Z][a-zA-Z0-9_]*") String namespace) throws ResourceNeedCreatedAlreadyExistsException {
+                                      @Pattern(regexp = ParameterValidationConstraints.namespace) String namespace) throws ResourceNeedCreatedAlreadyExistsException {
         // the @PathVariable will assure the namespace value within URL is not null
         if (SecurityContextHolder.getContext().getAuthentication()
                 instanceof MgrAuthenticationToken) {
@@ -54,4 +58,19 @@ public class MgrNamespaceController {
         // will filter those bad requests
         throw new BadCredentialsException("Bad authentication");
     }
+
+    @RequestMapping(value = "/{namespace}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public RestfulResult getOneSpecificNamespace(@PathVariable("namespace")
+                                                 @Pattern(regexp = ParameterValidationConstraints.namespace) String namespace) throws ResourceNotFoundException {
+        DockerNamespace dockerNamespace = namespaceService.getDockerNamespaceByName(namespace);
+        if (dockerNamespace == null) {
+            throw new ResourceNotFoundException("no namespace was found which named " + namespace);
+        }
+        RestfulResult result = new RestfulResult(HttpStatus.OK.value(),
+                "required resource founded and shown in follow data");
+        result.addData("namespaces", Collections.singletonList(dockerNamespace));
+        return result;
+    }
+
 }
