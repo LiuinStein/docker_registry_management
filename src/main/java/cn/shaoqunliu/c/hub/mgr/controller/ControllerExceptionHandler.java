@@ -5,6 +5,7 @@ import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsExcepti
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -19,6 +20,9 @@ public class ControllerExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(value = {
             ConstraintViolationException.class,
+            // for constraint violation caused in a Java POJO
+            // with an @Valid annotation as a request parameter in controller
+            MethodArgumentNotValidException.class,
             PageNumberOutOfRangeException.class
     })
     public RestfulResult constraintViolationException(Exception e) {

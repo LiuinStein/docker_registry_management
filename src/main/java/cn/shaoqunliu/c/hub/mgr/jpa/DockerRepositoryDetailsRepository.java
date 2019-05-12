@@ -16,4 +16,8 @@ public interface DockerRepositoryDetailsRepository extends JpaRepository<DockerR
     @Query("SELECT dr.opened FROM DockerRepository dr WHERE namespace.id=(SELECT id FROM DockerNamespace WHERE name=:namespace) AND name=:repository")
     Boolean getOpenedByIdentifier(@Param("namespace") String namespace,
                                   @Param("repository") String repository);
+
+    @Query("SELECT dr.id FROM DockerRepository dr WHERE namespace.id=(SELECT id FROM DockerNamespace WHERE name=:namespace) AND name=:repository")
+    Integer getIdByIdentifier(@Param("namespace") String namespace,
+                              @Param("repository") String repository);
 }

@@ -96,7 +96,7 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
 //                            authenticationToken.getAccessDetails());
                     break;
                 case REPOSITORY:
-                    authenticated = false;
+                    authenticated = true;
 //                    authenticated = hasRepositoryPermission(
 //                            new DockerImageIdentifier(uriPart[3]),
 //                            authenticationToken.getHttpMethod(),
@@ -107,6 +107,8 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
                     throw new BadCredentialsException("bad request resource type");
             }
             authenticationToken.setAuthenticated(authenticated);
+            // TODO: not to return null here
+            // null will cause HTTP OK returned
             return authenticated ? authenticationToken : null;
         }
         return null;

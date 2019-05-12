@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.Pattern;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collections;
 
 @Validated
@@ -59,7 +60,8 @@ public class MgrNamespaceController {
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
-    public RestfulResult getNamespacesOfSomeone(@RequestParam(value = "page", required = false) Integer page) throws ResourceNotFoundException, PageNumberOutOfRangeException {
+    public RestfulResult getNamespacesOfSomeone(@RequestParam(value = "page", required = false)
+                                                @PositiveOrZero Integer page) throws ResourceNotFoundException, PageNumberOutOfRangeException {
         Integer uid = SecurityContextHolderUtils.getUid();
         Page<DockerNamespaceWithoutOwner> namespaces =
                 namespaceService.getNamespacesByOwner(uid,

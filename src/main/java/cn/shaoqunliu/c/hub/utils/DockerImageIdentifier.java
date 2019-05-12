@@ -23,6 +23,16 @@ public class DockerImageIdentifier {
         }
     }
 
+    public DockerImageIdentifier(String namespace, String repository) {
+        this(namespace, repository, null);
+    }
+
+    public DockerImageIdentifier(String namespace, String repository, String tag) {
+        this.namespace = namespace;
+        this.repository = repository;
+        this.tag = tag;
+    }
+
     public String getNamespace() {
         return namespace;
     }
