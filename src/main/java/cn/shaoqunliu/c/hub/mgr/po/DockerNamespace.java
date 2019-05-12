@@ -10,11 +10,14 @@ public class DockerNamespace {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(updatable = false)
     private Integer id;
+
+    @Column(updatable = false)
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner", referencedColumnName = "id")
+    @JoinColumn(name = "owner", referencedColumnName = "id", updatable = false)
     private DockerUser owner;
 
     public Integer getId() {

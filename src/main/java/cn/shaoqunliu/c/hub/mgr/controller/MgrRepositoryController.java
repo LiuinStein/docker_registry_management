@@ -1,7 +1,7 @@
 package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
-import cn.shaoqunliu.c.hub.mgr.po.DockerRepositoryDescription;
+import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.mgr.validation.ParameterValidationConstraints;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
@@ -36,7 +36,7 @@ public class MgrRepositoryController {
                                     @Pattern(regexp = ParameterValidationConstraints.repository)
                                             String repository,
                                     @RequestBody @Valid
-                                            DockerRepositoryDescription details) throws ResourceNotFoundException {
+                                            DockerRepository details) throws ResourceNotFoundException {
         DockerImageIdentifier identifier = new DockerImageIdentifier(namespace, repository);
         if (repositoryService.update(identifier, details) == null) {
             throw new ResourceNotFoundException("the requested repository with identifier " + identifier.getFullRepositoryName() + " is not found in this server");

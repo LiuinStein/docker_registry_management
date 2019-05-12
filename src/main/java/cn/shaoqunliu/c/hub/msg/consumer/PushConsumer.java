@@ -3,6 +3,7 @@ package cn.shaoqunliu.c.hub.msg.consumer;
 import cn.shaoqunliu.c.hub.mgr.po.DockerImage;
 import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.service.DockerImageService;
 import cn.shaoqunliu.c.hub.mgr.service.DockerNamespaceService;
@@ -51,13 +52,13 @@ public class PushConsumer {
             // bad message, exit immediately
             return;
         }
-        DockerRepository repository = repositoryService
-                .getDockerRepositoryByIdentifier(identifier.getNamespace(),
+        DockerRepositoryBasic repositoryBasic = repositoryService
+                .getDockerRepositoryBasicByIdentifier(identifier.getNamespace(),
                         identifier.getRepository());
-        if (repository == null) {
+        DockerRepository repository = new DockerRepository();
+        if (repositoryBasic == null) {
             // this repository is not exist in current database
             // so that we add this repository to database
-            repository = new DockerRepository();
             repository.setName(identifier.getRepository());
             repository.setOpened(true);
             repository.setOwner(owner);
@@ -72,6 +73,11 @@ public class PushConsumer {
             repository.setNamespace(namespace);
             // create the new repository
             repository = repositoryService.save(repository);
+        } else {
+            // set the interface info into DockerRepository
+            // all we need is only the id field due to the image table is
+            // associated with repository table only through the rid field
+            repository.setId(repositoryBasic.getId());
         }
         // the repository will never be null here and full described
         // update the tag info if it's exists or add if not

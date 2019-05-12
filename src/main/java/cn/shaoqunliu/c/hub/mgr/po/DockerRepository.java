@@ -1,6 +1,9 @@
 package cn.shaoqunliu.c.hub.mgr.po;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "docker_repository", indexes = {
@@ -14,16 +17,29 @@ public class DockerRepository {
     private Integer id;
 
     @OneToOne
-    @JoinColumn(name = "nid", referencedColumnName = "id")
+    @JoinColumn(name = "nid", referencedColumnName = "id", updatable = false)
     private DockerNamespace namespace;
 
+    @Column(updatable = false)
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner", referencedColumnName = "id")
+    @JoinColumn(name = "owner", referencedColumnName = "id", updatable = false)
     private DockerUser owner;
 
     private Boolean opened;
+
+    @Column(insertable = false)
+    private Long stars;
+
+    @Size(max = 150)
+    @Column(insertable = false)
+    private String description;
+
+    @Size(max = 16777215)
+    @JsonAlias("full_description")
+    @Column(insertable = false, length = 16777215)
+    private String fullDescription;
 
     public Integer getId() {
         return id;
@@ -63,5 +79,29 @@ public class DockerRepository {
 
     public void setOpened(Boolean opened) {
         this.opened = opened;
+    }
+
+    public Long getStars() {
+        return stars;
+    }
+
+    public void setStars(Long stars) {
+        this.stars = stars;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getFullDescription() {
+        return fullDescription;
+    }
+
+    public void setFullDescription(String fullDescription) {
+        this.fullDescription = fullDescription;
     }
 }

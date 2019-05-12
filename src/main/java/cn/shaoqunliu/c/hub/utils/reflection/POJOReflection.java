@@ -124,6 +124,13 @@ public class POJOReflection {
         }
     }
 
+    public void forEachMethod(Consumer<Method> action) {
+        Objects.requireNonNull(action);
+        for (Method method : clazz.getDeclaredMethods()) {
+            action.accept(method);
+        }
+    }
+
     /**
      * Create a stream of field
      *

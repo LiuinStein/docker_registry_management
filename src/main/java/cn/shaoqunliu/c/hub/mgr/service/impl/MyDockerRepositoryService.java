@@ -1,9 +1,9 @@
 package cn.shaoqunliu.c.hub.mgr.service.impl;
 
-import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDescriptionRepository;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
+import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
-import cn.shaoqunliu.c.hub.mgr.po.DockerRepositoryDescription;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import cn.shaoqunliu.c.hub.utils.ObjectCopyingUtils;
@@ -16,26 +16,17 @@ import java.util.Objects;
 public class MyDockerRepositoryService implements DockerRepositoryService {
 
     private final DockerRepositoryDetailsRepository repositoryDetailsRepository;
-    private final DockerRepositoryDescriptionRepository repositoryDescriptionRepository;
 
     @Autowired
-    public MyDockerRepositoryService(DockerRepositoryDetailsRepository repositoryDetailsRepository, DockerRepositoryDescriptionRepository repositoryDescriptionRepository) {
+    public MyDockerRepositoryService(DockerRepositoryDetailsRepository repositoryDetailsRepository) {
         this.repositoryDetailsRepository = repositoryDetailsRepository;
-        this.repositoryDescriptionRepository = repositoryDescriptionRepository;
     }
 
     @Override
-    public DockerRepository getDockerRepositoryByIdentifier(String namespace, String repository) {
+    public DockerRepositoryBasic getDockerRepositoryBasicByIdentifier(String namespace, String repository) {
         Objects.requireNonNull(namespace);
         Objects.requireNonNull(repository);
-        return repositoryDetailsRepository.getDockerRepositoryByIdentifier(namespace, repository);
-    }
-
-    @Override
-    public Boolean isOpened(String namespace, String repository) {
-        Objects.requireNonNull(namespace);
-        Objects.requireNonNull(repository);
-        return repositoryDetailsRepository.getOpenedByIdentifier(namespace, repository);
+        return repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(namespace, repository);
     }
 
     @Override
@@ -45,15 +36,17 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
     }
 
     @Override
-    public Integer update(DockerImageIdentifier identifier, DockerRepositoryDescription newer) {
-        DockerRepositoryDescription current = repositoryDescriptionRepository
-                .getDockerRepositoryDescriptionByIdentifier(
+    public Integer update(DockerImageIdentifier identifier, DockerRepository newer) {
+        DockerRepository current = repositoryDetailsRepository
+                .getDockerRepositoryByNamespaceNameAndName(
                         identifier.getNamespace(), identifier.getRepository()
                 );
         if (current == null) {
             return null;
         }
-        return repositoryDescriptionRepository.save(
+        // never update stars
+        newer.setStars(null);
+        return repositoryDetailsRepository.save(
                 ObjectCopyingUtils.copyNullProperties(current, newer)
         ).getId();
     }

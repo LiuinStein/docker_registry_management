@@ -2,7 +2,10 @@ package cn.shaoqunliu.c.hub.mgr.service.impl;
 
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerImageRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerImage;
+import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerImageBasic;
 import cn.shaoqunliu.c.hub.mgr.service.DockerImageService;
+import cn.shaoqunliu.c.hub.utils.ObjectCopyingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,15 +26,21 @@ public class MyDockerImageService implements DockerImageService {
     @Override
     public DockerImage updateIfExistsAndAddIfNot(DockerImage image) {
         Objects.requireNonNull(image);
-        DockerImage current = imageRepository.getDockerImageByRepositoryAndName(image.getRepository(), image.getName());
+        DockerImageBasic current = imageRepository.getDockerImageByRepositoryAndName(image.getRepository(), image.getName());
         if (current == null) {
             // add if not exists
             image.setCreated(new Date());
             return imageRepository.save(image);
         }
+        DockerImage newerImage = ObjectCopyingUtils.copyProjectionToEntity(
+                current, new DockerImage()
+        );
+        newerImage.setRepository(ObjectCopyingUtils.copyProjectionToEntity(
+                current.getRepository(), new DockerRepository()
+        ));
         // update if exists
-        current.setSize(image.getSize());
-        current.setSha256(image.getSha256());
-        return imageRepository.save(current);
+        newerImage.setSize(image.getSize());
+        newerImage.setSha256(image.getSha256());
+        return imageRepository.save(newerImage);
     }
 }
