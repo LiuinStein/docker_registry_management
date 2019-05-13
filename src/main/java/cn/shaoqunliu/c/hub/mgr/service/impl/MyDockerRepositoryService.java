@@ -4,11 +4,14 @@ import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import cn.shaoqunliu.c.hub.utils.ObjectCopyingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -34,6 +37,12 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
         return repositoryDetailsRepository.getDockerRepositoryDescriptionByNamespaceNameAndName(
                 Objects.requireNonNull(namespace), Objects.requireNonNull(repository)
         );
+    }
+
+    @Override
+    public Page<DockerRepositoryBriefDescription> getBriefDescriptionByNamespace(String namespace, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        return repositoryDetailsRepository.findAllByNamespaceNameOrderByStarsDesc(namespace, pageRequest);
     }
 
     @Override

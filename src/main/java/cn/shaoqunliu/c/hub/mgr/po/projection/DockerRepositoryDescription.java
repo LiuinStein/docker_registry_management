@@ -1,7 +1,5 @@
 package cn.shaoqunliu.c.hub.mgr.po.projection;
 
-import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
-
 public interface DockerRepositoryDescription {
 
     Integer getId();
