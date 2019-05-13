@@ -5,8 +5,11 @@ import cn.shaoqunliu.c.hub.mgr.po.DockerImage;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerImageBasic;
 import cn.shaoqunliu.c.hub.mgr.service.DockerImageService;
+import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import cn.shaoqunliu.c.hub.utils.ObjectCopyingUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -42,5 +45,15 @@ public class MyDockerImageService implements DockerImageService {
         newerImage.setSize(image.getSize());
         newerImage.setSha256(image.getSha256());
         return imageRepository.save(newerImage);
+    }
+
+    @Override
+    public Page<DockerImageBasic> getImagesFromRepository(DockerImageIdentifier identifier, int page) {
+        Objects.requireNonNull(identifier);
+        return imageRepository.findAllByRepositoryNamespaceNameAndRepositoryName(
+                Objects.requireNonNull(identifier.getNamespace()),
+                Objects.requireNonNull(identifier.getRepository()),
+                PageRequest.of(page, 10)
+        );
     }
 }

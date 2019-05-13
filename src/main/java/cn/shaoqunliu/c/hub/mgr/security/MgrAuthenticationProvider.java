@@ -103,6 +103,8 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
 //                            authenticationToken.getAccessDetails());
                     break;
                 case IMAGE:
+                    authenticated = true;
+                    break;
                 default:
                     throw new BadCredentialsException("bad request resource type");
             }

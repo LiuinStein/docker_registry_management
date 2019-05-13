@@ -6,7 +6,7 @@ public interface DockerImageBasic {
 
     Integer getId();
 
-    DockerRepositoryBasic getRepository();
+    DockerRepositoryBasicWithoutOwner getRepository();
 
     String getName();
 
