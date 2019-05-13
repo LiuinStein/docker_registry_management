@@ -15,6 +15,12 @@ public interface DockerRepositoryService {
 
     Page<DockerRepositoryBriefDescription> getBriefDescriptionByNamespace(String namespace, int page);
 
+    Page<DockerRepositoryBriefDescription> getPublicRepositoryBriefDescription(int page);
+
+    Page<DockerRepositoryBriefDescription> getBriefDescriptionByFuzzyName(String name, int page);
+
+    Page<DockerRepositoryBriefDescription> getBriefDescriptionByOwner(int uid, int page);
+
     DockerRepository save(DockerRepository repository);
 
     Integer update(DockerImageIdentifier identifier,

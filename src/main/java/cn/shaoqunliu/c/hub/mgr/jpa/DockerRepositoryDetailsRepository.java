@@ -2,6 +2,7 @@ package cn.shaoqunliu.c.hub.mgr.jpa;
 
 import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
+import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
@@ -20,4 +21,10 @@ public interface DockerRepositoryDetailsRepository extends PagingAndSortingRepos
     DockerRepository getDockerRepositoryByNamespaceNameAndName(String namespace, String name);
 
     Page<DockerRepositoryBriefDescription> findAllByNamespaceNameOrderByStarsDesc(String namespace, Pageable pageable);
+
+    Page<DockerRepositoryBriefDescription> findAllByOpenedIsTrueOrderByStarsDesc(Pageable pageable);
+
+    Page<DockerRepositoryBriefDescription> findAllByNameContainsOrderByStarsDesc(String name, Pageable pageable);
+
+    Page<DockerRepositoryBriefDescription> findAllByOwnerOrderByStarsDesc(DockerUser user, Pageable pageable);
 }

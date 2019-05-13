@@ -3,6 +3,7 @@ package cn.shaoqunliu.c.hub.mgr.service.impl;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
+import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
@@ -42,7 +43,30 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
     @Override
     public Page<DockerRepositoryBriefDescription> getBriefDescriptionByNamespace(String namespace, int page) {
         PageRequest pageRequest = PageRequest.of(page, 10);
-        return repositoryDetailsRepository.findAllByNamespaceNameOrderByStarsDesc(namespace, pageRequest);
+        return repositoryDetailsRepository.findAllByNamespaceNameOrderByStarsDesc(
+                Objects.requireNonNull(namespace), pageRequest);
+    }
+
+    @Override
+    public Page<DockerRepositoryBriefDescription> getPublicRepositoryBriefDescription(int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        return repositoryDetailsRepository.findAllByOpenedIsTrueOrderByStarsDesc(pageRequest);
+    }
+
+    @Override
+    public Page<DockerRepositoryBriefDescription> getBriefDescriptionByFuzzyName(String name, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        return repositoryDetailsRepository.findAllByNameContainsOrderByStarsDesc(
+                Objects.requireNonNull(name), pageRequest
+        );
+    }
+
+    @Override
+    public Page<DockerRepositoryBriefDescription> getBriefDescriptionByOwner(int uid, int page) {
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        DockerUser owner = new DockerUser();
+        owner.setId(uid);
+        return repositoryDetailsRepository.findAllByOwnerOrderByStarsDesc(owner, pageRequest);
     }
 
     @Override

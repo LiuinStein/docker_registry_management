@@ -9,6 +9,7 @@ import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.mgr.validation.ParameterValidationConstraints;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
+import cn.shaoqunliu.c.hub.utils.SecurityContextHolderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Validated
 @RestController
@@ -78,16 +81,51 @@ public class MgrRepositoryController {
         Page<DockerRepositoryBriefDescription> descriptions =
                 repositoryService.getBriefDescriptionByNamespace(namespace,
                         page == null ? 0 : page);
-        if (descriptions.getTotalElements() == 0) {
-            throw new ResourceNotFoundException("no repositories was found with namespace " + namespace);
-        }
-        if (descriptions.getNumberOfElements() == 0) {
-            throw new PageNumberOutOfRangeException("page number " + page + " out of range");
-        }
         RestfulResult result = new RestfulResult(HttpStatus.OK.value(), "required repositories founded");
-        result.addData("repositories", descriptions.getContent());
+        result.addData("repositories", getPageContent(descriptions));
         result.addData("total", descriptions.getTotalElements());
         return result;
     }
 
+    @RequestMapping(value = "", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public RestfulResult getRepositories(@RequestParam(value = "opened", required = false)
+                                                 Boolean opened,
+                                         @RequestParam(value = "name", required = false)
+                                         @Pattern(regexp = ParameterValidationConstraints.repository)
+                                                 String name,
+                                         @RequestParam(value = "page", required = false)
+                                         @PositiveOrZero Integer page) throws PageNumberOutOfRangeException, ResourceNotFoundException {
+        Page<DockerRepositoryBriefDescription> descriptions;
+        page = page == null ? 0 : page;
+        if (opened != null) {
+            if (!opened) {
+                RestfulResult result = new RestfulResult(HttpStatus.OK.value(), "empty result array is returned");
+                result.addData("repositories", new ArrayList<>());
+                return result;
+            }
+            // get a list of public repositories
+            descriptions = repositoryService.getPublicRepositoryBriefDescription(page);
+        } else if (name != null) {
+            // get repositories with a fuzzy name
+            descriptions = repositoryService.getBriefDescriptionByFuzzyName(name, page);
+        } else {
+            // get repositories by current authenticated user id
+            descriptions = repositoryService.getBriefDescriptionByOwner(SecurityContextHolderUtils.getUid(), page);
+        }
+        RestfulResult result = new RestfulResult(HttpStatus.OK.value(), "required repositories founded");
+        result.addData("repositories", getPageContent(descriptions));
+        result.addData("total", descriptions.getTotalElements());
+        return result;
+    }
+
+    private <T> List<T> getPageContent(Page<T> page) throws ResourceNotFoundException, PageNumberOutOfRangeException {
+        if (page.getTotalElements() == 0) {
+            throw new ResourceNotFoundException("no repositories was found");
+        }
+        if (page.getNumberOfElements() == 0) {
+            throw new PageNumberOutOfRangeException("page number " + page.getNumber() + " out of range");
+        }
+        return page.getContent();
+    }
 }

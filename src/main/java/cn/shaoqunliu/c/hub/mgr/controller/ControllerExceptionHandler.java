@@ -23,6 +23,9 @@ public class ControllerExceptionHandler {
             // for constraint violation caused in a Java POJO
             // with an @Valid annotation as a request parameter in controller
             MethodArgumentNotValidException.class,
+            // throw at when spring mvc controller try to convert a bad boolean
+            // value within URL parameters.
+            IllegalArgumentException.class,
             PageNumberOutOfRangeException.class
     })
     public RestfulResult constraintViolationException(Exception e) {
