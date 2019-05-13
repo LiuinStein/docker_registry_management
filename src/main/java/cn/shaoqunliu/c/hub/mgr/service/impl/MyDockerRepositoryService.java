@@ -4,6 +4,7 @@ import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import cn.shaoqunliu.c.hub.utils.ObjectCopyingUtils;
@@ -24,9 +25,15 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
 
     @Override
     public DockerRepositoryBasic getDockerRepositoryBasicByIdentifier(String namespace, String repository) {
-        Objects.requireNonNull(namespace);
-        Objects.requireNonNull(repository);
-        return repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(namespace, repository);
+        return repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(
+                Objects.requireNonNull(namespace), Objects.requireNonNull(repository));
+    }
+
+    @Override
+    public DockerRepositoryDescription getDockerRepositoryDescriptionByIdentifier(String namespace, String repository) {
+        return repositoryDetailsRepository.getDockerRepositoryDescriptionByNamespaceNameAndName(
+                Objects.requireNonNull(namespace), Objects.requireNonNull(repository)
+        );
     }
 
     @Override

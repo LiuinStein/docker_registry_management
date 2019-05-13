@@ -14,7 +14,7 @@ public interface DockerRepositoryDescription {
 
     String getFullDescription();
 
-    DockerNamespace getNamespace();
+    DockerNamespaceWithoutOwner getNamespace();
 
     String getName();
 }

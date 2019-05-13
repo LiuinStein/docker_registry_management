@@ -2,6 +2,7 @@ package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
 import cn.shaoqunliu.c.hub.mgr.validation.ParameterValidationConstraints;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Pattern;
+import java.util.Collections;
 
 @Validated
 @RestController
@@ -42,5 +44,23 @@ public class MgrRepositoryController {
             throw new ResourceNotFoundException("the requested repository with identifier " + identifier.getFullRepositoryName() + " is not found in this server");
         }
         return new RestfulResult(HttpStatus.ACCEPTED.value(), "update success");
+    }
+
+    @RequestMapping(value = "/{namespace}/{repository}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public RestfulResult getOneSpecificRepository(@PathVariable("namespace")
+                                                  @Pattern(regexp = ParameterValidationConstraints.namespace)
+                                                          String namespace,
+                                                  @PathVariable("repository")
+                                                  @Pattern(regexp = ParameterValidationConstraints.repository)
+                                                          String repository) throws ResourceNotFoundException {
+        DockerRepositoryDescription description = repositoryService
+                .getDockerRepositoryDescriptionByIdentifier(namespace, repository);
+        if (description == null) {
+            throw new ResourceNotFoundException("the required repository with identifier " + namespace + "/" + repository + " was not found");
+        }
+        RestfulResult result = new RestfulResult(HttpStatus.OK.value(), "repository found");
+        result.addData("repositories", Collections.singletonList(description));
+        return result;
     }
 }
