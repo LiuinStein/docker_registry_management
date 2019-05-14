@@ -7,12 +7,21 @@ import javax.persistence.*;
 public class MgrUserInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // associated with MgrUser.id, not a generated value
     private Integer id;
+
+    @Column(insertable = false)
     private String phone;
+
+    @Column(insertable = false)
     private String realName;
+
+    @Column(insertable = false)
     private String location;
+
+    @Column(insertable = false)
     private String website;
+
     private String gravatar;
 
     public Integer getId() {

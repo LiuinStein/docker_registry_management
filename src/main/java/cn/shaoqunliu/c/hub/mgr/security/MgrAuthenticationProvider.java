@@ -28,7 +28,8 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
         NAMESPACE(0, "namespace"),
         REPOSITORY(1, "repository"),
         IMAGE(2, "image"),
-        STAR(3, "star");
+        STAR(3, "star"),
+        USER(4, "user");
 
         private int val;
         private String str;
@@ -43,10 +44,10 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
         }
 
         public static ResourceType valueOf(int v) {
-            if (v < 0 || v > 3) {
+            if (v < 0 || v > 4) {
                 return null;
             }
-            ResourceType[] mapper = {NAMESPACE, REPOSITORY, IMAGE, STAR};
+            ResourceType[] mapper = {NAMESPACE, REPOSITORY, IMAGE, STAR, USER};
             return mapper[v];
         }
 
@@ -61,6 +62,8 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
                     return IMAGE;
                 case "star":
                     return STAR;
+                case "user":
+                    return USER;
                 default:
                     return null;
             }
@@ -107,6 +110,7 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
                     break;
                 case IMAGE:
                 case STAR:
+                case USER:
                     authenticated = true;
                     break;
                 default:

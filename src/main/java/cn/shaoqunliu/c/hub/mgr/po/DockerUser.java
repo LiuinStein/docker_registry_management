@@ -4,8 +4,8 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "docker_auth", indexes = {
-        @Index(name = "idx_auth_username", columnList = "username"),
-        @Index(columnList = "username", unique = true)
+        @Index(columnList = "username", unique = true),
+        @Index(columnList = "email", unique = true)
 })
 public class DockerUser {
 
