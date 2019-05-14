@@ -10,4 +10,6 @@ public interface DockerImageService {
     DockerImage updateIfExistsAndAddIfNot(DockerImage image);
 
     Page<DockerImageBasic> getImagesFromRepository(DockerImageIdentifier identifier, int page);
+
+    void deleteByIdentifier(DockerImageIdentifier identifier);
 }

@@ -54,4 +54,18 @@ public class MgrImageController {
         result.addData("images", images.getContent());
         return result;
     }
+
+    @RequestMapping(value = "/{namespace}/{repository}/{tag}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteByIdentifier(@PathVariable("namespace")
+                                   @Pattern(regexp = ParameterValidationConstraints.namespace)
+                                           String namespace,
+                                   @PathVariable("repository")
+                                   @Pattern(regexp = ParameterValidationConstraints.repository)
+                                           String repository,
+                                   @PathVariable("tag")
+                                   @Pattern(regexp = ParameterValidationConstraints.tag)
+                                           String tag) {
+        imageService.deleteByIdentifier(new DockerImageIdentifier(namespace, repository, tag));
+    }
 }

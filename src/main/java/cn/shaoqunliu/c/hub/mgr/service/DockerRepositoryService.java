@@ -2,10 +2,13 @@ package cn.shaoqunliu.c.hub.mgr.service;
 
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasicWithoutOwner;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface DockerRepositoryService {
 
@@ -25,4 +28,6 @@ public interface DockerRepositoryService {
 
     Integer update(DockerImageIdentifier identifier,
                    DockerRepository details);
+
+    void deleteByIdentifier(DockerImageIdentifier identifier);
 }

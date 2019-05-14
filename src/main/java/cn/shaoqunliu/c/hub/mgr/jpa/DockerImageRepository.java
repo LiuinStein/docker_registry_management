@@ -14,4 +14,8 @@ public interface DockerImageRepository extends PagingAndSortingRepository<Docker
     DockerImageBasic getDockerImageByRepositoryAndName(DockerRepository repository, String name);
 
     Page<DockerImageBasic> findAllByRepositoryNamespaceNameAndRepositoryName(String namespace, String repository, Pageable pageable);
+
+    void deleteByRepository(DockerRepository repository);
+
+    void deleteByRepositoryNamespaceNameAndRepositoryNameAndName(String namespace, String repository, String tag);
 }

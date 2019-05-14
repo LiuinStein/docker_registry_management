@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.Objects;
 
@@ -54,6 +55,17 @@ public class MyDockerImageService implements DockerImageService {
                 Objects.requireNonNull(identifier.getNamespace()),
                 Objects.requireNonNull(identifier.getRepository()),
                 PageRequest.of(page, 10)
+        );
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void deleteByIdentifier(DockerImageIdentifier identifier) {
+        Objects.requireNonNull(identifier);
+        imageRepository.deleteByRepositoryNamespaceNameAndRepositoryNameAndName(
+                Objects.requireNonNull(identifier.getNamespace()),
+                Objects.requireNonNull(identifier.getRepository()),
+                Objects.requireNonNull(identifier.getTag())
         );
     }
 }

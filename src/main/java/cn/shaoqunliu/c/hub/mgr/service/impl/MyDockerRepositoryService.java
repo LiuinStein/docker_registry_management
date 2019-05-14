@@ -1,10 +1,11 @@
 package cn.shaoqunliu.c.hub.mgr.service.impl;
 
+import cn.shaoqunliu.c.hub.mgr.jpa.DockerImageRepository;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
-import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasicWithoutOwner;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
@@ -15,16 +16,20 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Objects;
 
 @Service("myDockerRepositoryService")
 public class MyDockerRepositoryService implements DockerRepositoryService {
 
     private final DockerRepositoryDetailsRepository repositoryDetailsRepository;
+    private final DockerImageRepository imageRepository;
 
     @Autowired
-    public MyDockerRepositoryService(DockerRepositoryDetailsRepository repositoryDetailsRepository) {
+    public MyDockerRepositoryService(DockerRepositoryDetailsRepository repositoryDetailsRepository, DockerImageRepository imageRepository) {
         this.repositoryDetailsRepository = repositoryDetailsRepository;
+        this.imageRepository = imageRepository;
     }
 
     @Override
@@ -89,5 +94,26 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
         return repositoryDetailsRepository.save(
                 ObjectCopyingUtils.copyNullProperties(current, newer)
         ).getId();
+    }
+
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void deleteByIdentifier(DockerImageIdentifier identifier) {
+        Objects.requireNonNull(identifier);
+        // get repository deleted
+        DockerRepositoryBasic repositoryBasic =
+                repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(
+                        Objects.requireNonNull(identifier.getNamespace()),
+                        Objects.requireNonNull(identifier.getRepository())
+                );
+        if (repositoryBasic == null) {
+            return;
+        }
+        // deleted images within this repository
+        DockerRepository repository = new DockerRepository();
+        repository.setId(repositoryBasic.getId());
+        imageRepository.deleteByRepository(repository);
+        // delete repository info
+        repositoryDetailsRepository.deleteById(repositoryBasic.getId());
     }
 }

@@ -12,4 +12,6 @@ public interface DockerNamespaceService {
     Page<DockerNamespaceWithoutOwner> getNamespacesByOwner(int uid, int page);
 
     DockerNamespace addNamespaceIfNotExists(String namespace, int uid) throws ResourceNeedCreatedAlreadyExistsException;
+
+    void deleteByName(String namespace);
 }

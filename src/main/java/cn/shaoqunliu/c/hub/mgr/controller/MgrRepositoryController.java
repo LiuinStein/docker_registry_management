@@ -53,6 +53,17 @@ public class MgrRepositoryController {
         return new RestfulResult(HttpStatus.ACCEPTED.value(), "update success");
     }
 
+    @RequestMapping(value = "/{namespace}/{repository}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteRepository(@PathVariable("namespace")
+                                          @Pattern(regexp = ParameterValidationConstraints.namespace)
+                                                  String namespace,
+                                          @PathVariable("repository")
+                                          @Pattern(regexp = ParameterValidationConstraints.repository)
+                                                  String repository) {
+        repositoryService.deleteByIdentifier(new DockerImageIdentifier(namespace, repository));
+    }
+
     @RequestMapping(value = "/{namespace}/{repository}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public RestfulResult getOneSpecificRepository(@PathVariable("namespace")

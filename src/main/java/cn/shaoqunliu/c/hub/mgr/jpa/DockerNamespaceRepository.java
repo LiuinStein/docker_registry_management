@@ -16,4 +16,6 @@ public interface DockerNamespaceRepository extends PagingAndSortingRepository<Do
     Page<DockerNamespaceWithoutOwner> findAllByOwner(DockerUser owner, Pageable pageable);
 
     Boolean existsByName(String name);
+
+    void deleteByName(String name);
 }

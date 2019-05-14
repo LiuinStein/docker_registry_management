@@ -44,6 +44,14 @@ public class MgrNamespaceController {
         return result;
     }
 
+    @RequestMapping(value = "/{namespace}", method = RequestMethod.DELETE, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNamespace(@PathVariable("namespace")
+                                @Pattern(regexp = ParameterValidationConstraints.namespace)
+                                        String namespace) {
+        namespaceService.deleteByName(namespace);
+    }
+
     @RequestMapping(value = "/{namespace}", method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.OK)
     public RestfulResult getOneSpecificNamespace(@PathVariable("namespace")
