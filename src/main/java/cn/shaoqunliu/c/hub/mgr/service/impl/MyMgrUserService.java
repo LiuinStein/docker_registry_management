@@ -77,4 +77,18 @@ public class MyMgrUserService implements MgrUserService {
         updated.setCpassword(passwordEncoder.encode(newer));
         return userRepository.save(updated).getId();
     }
+
+    @Override
+    public Integer updateUserInfo(MgrUserInfo info) {
+        Objects.requireNonNull(info);
+        Optional<MgrUserInfo> current = infoRepository.findById(
+                Objects.requireNonNull(info.getId())
+        );
+        if (current.isEmpty()) {
+            return null;
+        }
+        return infoRepository.save(ObjectCopyingUtils.copyNonNullProperties(
+                current.get(), info
+        )).getId();
+    }
 }

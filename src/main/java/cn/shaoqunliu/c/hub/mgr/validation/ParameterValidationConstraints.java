@@ -7,4 +7,6 @@ public class ParameterValidationConstraints {
     public static final String repository = "[a-zA-Z][a-zA-Z0-9_-]*";
 
     public static final String tag = "[a-zA-Z][a-zA-Z0-9_-]*";
+
+    public static final String phone = "[0-9]*";
 }

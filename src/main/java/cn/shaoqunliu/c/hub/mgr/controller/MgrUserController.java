@@ -2,6 +2,7 @@ package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsException;
 import cn.shaoqunliu.c.hub.mgr.po.MgrUser;
+import cn.shaoqunliu.c.hub.mgr.po.MgrUserInfo;
 import cn.shaoqunliu.c.hub.mgr.service.MgrUserService;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
 import cn.shaoqunliu.c.hub.utils.SecurityContextHolderUtils;
@@ -69,5 +70,15 @@ public class MgrUserController {
         }
         return new RestfulResult(HttpStatus.ACCEPTED.value(),
                 "The required password change has been accomplished");
+    }
+
+    @RequestMapping(value = "/info", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public RestfulResult updateUserInfo(@RequestBody @Valid MgrUserInfo userInfo) {
+        userInfo.setId(SecurityContextHolderUtils.getUid());
+        if (userService.updateUserInfo(userInfo) == null) {
+            throw new BadCredentialsException("bad credentials");
+        }
+        return new RestfulResult(HttpStatus.ACCEPTED.value(), "user info updated");
     }
 }
