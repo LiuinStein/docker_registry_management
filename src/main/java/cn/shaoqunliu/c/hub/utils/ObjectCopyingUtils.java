@@ -7,7 +7,7 @@ import java.lang.reflect.Proxy;
 
 public class ObjectCopyingUtils {
 
-    public static <T> T copyNullProperties(T source, T target) {
+    public static <T> T copyNonNullProperties(T source, T target) {
         POJOReflection sourceReflection = new POJOReflection(source);
         POJOReflection targetReflection = new POJOReflection(target);
         targetReflection.forEachField(field -> {

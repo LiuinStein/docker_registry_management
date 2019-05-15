@@ -5,7 +5,6 @@ import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
-import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasicWithoutOwner;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryDescription;
 import cn.shaoqunliu.c.hub.mgr.service.DockerRepositoryService;
@@ -17,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Objects;
 
 @Service("myDockerRepositoryService")
@@ -92,7 +90,7 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
         // never update stars
         newer.setStars(null);
         return repositoryDetailsRepository.save(
-                ObjectCopyingUtils.copyNullProperties(current, newer)
+                ObjectCopyingUtils.copyNonNullProperties(current, newer)
         ).getId();
     }
 

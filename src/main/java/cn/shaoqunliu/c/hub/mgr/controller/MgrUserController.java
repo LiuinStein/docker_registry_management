@@ -4,14 +4,18 @@ import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsExcepti
 import cn.shaoqunliu.c.hub.mgr.po.MgrUser;
 import cn.shaoqunliu.c.hub.mgr.service.MgrUserService;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
+import cn.shaoqunliu.c.hub.utils.SecurityContextHolderUtils;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 @Validated
 @RestController
@@ -37,5 +41,33 @@ public class MgrUserController {
                 "user created");
         result.addData("id", id);
         return result;
+    }
+
+    @RequestMapping(value = "/password", method = RequestMethod.PATCH, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public RestfulResult changePassword(@RequestBody JSONObject jsonObject) {
+        String raw, newer;
+        Integer id;
+        if (jsonObject.containsKey("raw_c") && jsonObject.containsKey("new_c")) {
+            // change docker client password
+            raw = Objects.requireNonNull(jsonObject.getString("raw_c"));
+            newer = Objects.requireNonNull(jsonObject.getString("new_c"));
+            id = userService.changeDockerClientPassword(
+                    SecurityContextHolderUtils.getUid(), raw, newer
+            );
+        } else if (jsonObject.containsKey("raw_m") && jsonObject.containsKey("new_m")) {
+            raw = Objects.requireNonNull(jsonObject.getString("raw_m"));
+            newer = Objects.requireNonNull(jsonObject.getString("new_m"));
+            id = userService.changeMasterPassword(
+                    SecurityContextHolderUtils.getUid(), raw, newer
+            );
+        } else {
+            throw new IllegalArgumentException("the parameters within changing password request is illegal");
+        }
+        if (id == null || newer.length() < 6 || newer.length() > 32) {
+            throw new BadCredentialsException("raw password error");
+        }
+        return new RestfulResult(HttpStatus.ACCEPTED.value(),
+                "The required password change has been accomplished");
     }
 }

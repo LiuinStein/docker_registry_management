@@ -5,6 +5,8 @@ import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsExcepti
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -26,10 +28,22 @@ public class ControllerExceptionHandler {
             // throw at when spring mvc controller try to convert a bad boolean
             // value within URL parameters.
             IllegalArgumentException.class,
+            // occurred when an empty Http request body was sent to a controller
+            // method which need a described body info
+            HttpMessageNotReadableException.class,
             PageNumberOutOfRangeException.class
     })
     public RestfulResult constraintViolationException(Exception e) {
         return new RestfulResult(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(value = {
+            BadCredentialsException.class
+    })
+    public RestfulResult authenticationError(Exception e) {
+        return new RestfulResult(HttpStatus.FORBIDDEN.value(), e.getMessage());
     }
 
     @ResponseBody
