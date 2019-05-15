@@ -24,7 +24,7 @@ public class DockerRepository {
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "owner", referencedColumnName = "id", updatable = false)
+    @JoinColumn(name = "owner", referencedColumnName = "id")
     private DockerUser owner;
 
     private Boolean opened;

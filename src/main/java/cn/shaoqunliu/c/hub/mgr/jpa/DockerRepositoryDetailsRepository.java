@@ -1,6 +1,5 @@
 package cn.shaoqunliu.c.hub.mgr.jpa;
 
-import cn.shaoqunliu.c.hub.mgr.po.DockerNamespace;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
 import cn.shaoqunliu.c.hub.mgr.po.projection.*;
@@ -37,4 +36,8 @@ public interface DockerRepositoryDetailsRepository extends PagingAndSortingRepos
     @Modifying
     @Query("UPDATE DockerRepository dr SET dr.stars=dr.stars+?1 WHERE id=?2")
     void starOnce(Long num, Integer rid);
+
+    @Modifying
+    @Query("UPDATE DockerRepository dr SET dr.owner=?1 WHERE dr.id=?2")
+    void changeOwner(DockerUser owner, Integer id);
 }
