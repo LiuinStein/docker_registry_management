@@ -7,11 +7,14 @@ import cn.shaoqunliu.c.hub.mgr.jpa.DockerUserRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerPermission;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerPermissionBasic;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
 import cn.shaoqunliu.c.hub.mgr.security.details.Action;
 import cn.shaoqunliu.c.hub.mgr.service.DockerPermissionService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -81,5 +84,16 @@ public class MyDockerPermissionService implements DockerPermissionService {
         permission.setRepository(repository);
         permission.setAction(Objects.requireNonNull(action).value());
         permissionRepository.save(permission);
+    }
+
+    @Override
+    public Page<DockerPermissionBasic> getPermissionsByRepository(DockerImageIdentifier identifier, int page) {
+        Objects.requireNonNull(identifier);
+        PageRequest pageRequest = PageRequest.of(page, 10);
+        return permissionRepository.findAllByRepositoryNamespaceNameAndRepositoryName(
+                Objects.requireNonNull(identifier.getNamespace()),
+                Objects.requireNonNull(identifier.getRepository()),
+                pageRequest
+        );
     }
 }
