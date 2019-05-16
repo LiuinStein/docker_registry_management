@@ -1,8 +1,11 @@
 package cn.shaoqunliu.c.hub.mgr.service.impl;
 
+import cn.shaoqunliu.c.hub.mgr.exception.PageNumberOutOfRangeException;
+import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerStarRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerStars;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBriefDescription;
 import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryStars;
 import cn.shaoqunliu.c.hub.mgr.service.DockerStarsService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
@@ -10,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Service("myDockerStarsService")
@@ -81,5 +86,23 @@ public class MyDockerStarsService implements DockerStarsService {
         return repositoryStars != null &&
                 starRepository.existsByPkUidAndPkRid(uid,
                         Objects.requireNonNull(repositoryStars.getId()));
+    }
+
+    @Override
+    public List<DockerRepositoryBriefDescription> getStarredRepositoriesByUserId(int uid) throws ResourceNotFoundException {
+        List<DockerStars> starred = starRepository.findAllByPkUid(uid);
+        if (starred.size() == 0) {
+            throw new ResourceNotFoundException("no starred repository was found");
+        }
+        List<DockerRepositoryBriefDescription> result = new ArrayList<>();
+        starred.forEach(x -> {
+            DockerRepositoryBriefDescription description =
+                    repositoryDetailsRepository.getDockerRepositoryBriefDescriptionById(x.getPk().getRid());
+            if (description == null) {
+                return;
+            }
+            result.add(description);
+        });
+        return result;
     }
 }

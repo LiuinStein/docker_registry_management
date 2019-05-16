@@ -15,6 +15,8 @@ import java.util.List;
 @Repository
 public interface DockerRepositoryDetailsRepository extends PagingAndSortingRepository<DockerRepository, Integer> {
 
+    DockerRepositoryBriefDescription getDockerRepositoryBriefDescriptionById(Integer id);
+
     DockerRepositoryBasic getDockerRepositoryBasicByNamespaceNameAndName(String namespace, String name);
 
     DockerRepositoryDescription getDockerRepositoryDescriptionByNamespaceNameAndName(String namespace, String name);
