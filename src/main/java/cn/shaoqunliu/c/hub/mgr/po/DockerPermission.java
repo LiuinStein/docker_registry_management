@@ -20,6 +20,8 @@ public class DockerPermission {
     @JoinColumn(name = "rid", referencedColumnName = "id")
     private DockerRepository repository;
 
+    private Integer action;
+
     public Integer getId() {
         return id;
     }
@@ -42,5 +44,13 @@ public class DockerPermission {
 
     public void setRepository(DockerRepository repository) {
         this.repository = repository;
+    }
+
+    public Integer getAction() {
+        return action;
+    }
+
+    public void setAction(Integer action) {
+        this.action = action;
     }
 }

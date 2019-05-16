@@ -1,6 +1,7 @@
 package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
+import cn.shaoqunliu.c.hub.mgr.security.details.Action;
 import cn.shaoqunliu.c.hub.mgr.service.DockerPermissionService;
 import cn.shaoqunliu.c.hub.mgr.validation.ParameterValidationConstraints;
 import cn.shaoqunliu.c.hub.mgr.vo.RestfulResult;
@@ -50,4 +51,27 @@ public class MgrPermissionController {
         return new RestfulResult(HttpStatus.ACCEPTED.value(), "owner changed");
     }
 
+    @RequestMapping(value = "/{namespace}/{repository}", method = RequestMethod.PUT, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public RestfulResult changeDockerPermission(@PathVariable("namespace")
+                                                @Pattern(regexp = ParameterValidationConstraints.namespace)
+                                                        String namespace,
+                                                @PathVariable("repository")
+                                                @Pattern(regexp = ParameterValidationConstraints.repository)
+                                                        String repository,
+                                                @RequestBody @NotNull @Valid
+                                                        JSONObject jsonObject) throws ResourceNotFoundException {
+        if (!jsonObject.containsKey("username") ||
+                !jsonObject.containsKey("action")) {
+            throw new IllegalArgumentException("incomplete request body parameters");
+        }
+        String username = jsonObject.getString("username");
+        Action action = Action.of(jsonObject.getString("action"));
+        if (action== Action.NULL || action ==Action.PUSH) {
+            throw new IllegalArgumentException("Bad action");
+        }
+        DockerImageIdentifier identifier = new DockerImageIdentifier(namespace, repository);
+        permissionService.changeDockerPermissions(identifier, username, action);
+        return new RestfulResult(HttpStatus.ACCEPTED.value(), "permission granted");
+    }
 }

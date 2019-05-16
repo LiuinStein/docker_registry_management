@@ -4,8 +4,11 @@ import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerPermissionRepository;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerRepositoryDetailsRepository;
 import cn.shaoqunliu.c.hub.mgr.jpa.DockerUserRepository;
+import cn.shaoqunliu.c.hub.mgr.po.DockerPermission;
 import cn.shaoqunliu.c.hub.mgr.po.DockerRepository;
 import cn.shaoqunliu.c.hub.mgr.po.DockerUser;
+import cn.shaoqunliu.c.hub.mgr.po.projection.DockerRepositoryBasic;
+import cn.shaoqunliu.c.hub.mgr.security.details.Action;
 import cn.shaoqunliu.c.hub.mgr.service.DockerPermissionService;
 import cn.shaoqunliu.c.hub.utils.DockerImageIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +56,30 @@ public class MyDockerPermissionService implements DockerPermissionService {
             throw new BadCredentialsException("the operator is not the owner of this namespace or the repository can not change owner twice");
         }
         repositoryDetailsRepository.changeOwner(user, repository.getId());
+    }
+
+    @Override
+    public void changeDockerPermissions(DockerImageIdentifier identifier, String username, Action action) throws ResourceNotFoundException {
+        Objects.requireNonNull(identifier);
+        DockerRepositoryBasic repositoryBasic = repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(
+                Objects.requireNonNull(identifier.getNamespace()),
+                Objects.requireNonNull(identifier.getRepository())
+        );
+        if (repositoryBasic == null) {
+            throw new ResourceNotFoundException("the required repository with identifier " + identifier.getFullRepositoryName() + " was not found");
+        }
+        DockerUser user = userRepository.getDockerUserByUsername(
+                Objects.requireNonNull(username)
+        );
+        if (user == null) {
+            throw new ResourceNotFoundException("the user with username " + username + " is not exists");
+        }
+        DockerRepository repository = new DockerRepository();
+        repository.setId(repositoryBasic.getId());
+        DockerPermission permission = new DockerPermission();
+        permission.setUser(user);
+        permission.setRepository(repository);
+        permission.setAction(Objects.requireNonNull(action).value());
+        permissionRepository.save(permission);
     }
 }
