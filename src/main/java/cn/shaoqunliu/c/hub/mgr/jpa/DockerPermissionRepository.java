@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 public interface DockerPermissionRepository extends PagingAndSortingRepository<DockerPermission, Integer> {
 
     Page<DockerPermissionBasic> findAllByRepositoryNamespaceNameAndRepositoryName(String namespace, String repository, Pageable pageable);
+
+    Boolean existsByUserIdAndRepositoryId(Integer uid, Integer repository);
 }

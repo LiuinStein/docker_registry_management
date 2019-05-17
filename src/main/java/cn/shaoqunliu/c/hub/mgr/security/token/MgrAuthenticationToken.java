@@ -11,14 +11,12 @@ public class MgrAuthenticationToken extends AbstractAuthenticationToken {
     private String uri;
     private HttpMethod httpMethod;
     private MgrAccessDetails accessDetails;
-    private Map<String, String[]> parameterMap;
 
-    public MgrAuthenticationToken(String uri, HttpMethod httpMethod, MgrAccessDetails accessDetails, Map<String, String[]> parameterMap) {
+    public MgrAuthenticationToken(String uri, HttpMethod httpMethod, MgrAccessDetails accessDetails) {
         super(null);
         this.uri = uri;
         this.httpMethod = httpMethod;
         this.accessDetails = accessDetails;
-        this.parameterMap = parameterMap;
     }
 
     @Override
@@ -45,13 +43,5 @@ public class MgrAuthenticationToken extends AbstractAuthenticationToken {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
-    }
-
-    public Map<String, String[]> getParameterMap() {
-        return parameterMap;
-    }
-
-    public void setParameterMap(Map<String, String[]> parameterMap) {
-        this.parameterMap = parameterMap;
     }
 }

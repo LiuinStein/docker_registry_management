@@ -30,4 +30,6 @@ public interface DockerRepositoryService {
                    DockerRepository details);
 
     void deleteByIdentifier(DockerImageIdentifier identifier);
+
+    boolean isOpened(DockerImageIdentifier identifier);
 }

@@ -77,6 +77,11 @@ public class MyDockerPermissionService implements DockerPermissionService {
         if (user == null) {
             throw new ResourceNotFoundException("the user with username " + username + " is not exists");
         }
+        if (permissionRepository.existsByUserIdAndRepositoryId(
+                user.getId(), repositoryBasic.getId())) {
+            // not add twice
+            return;
+        }
         DockerRepository repository = new DockerRepository();
         repository.setId(repositoryBasic.getId());
         DockerPermission permission = new DockerPermission();

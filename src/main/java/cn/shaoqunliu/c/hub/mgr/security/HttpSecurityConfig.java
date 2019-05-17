@@ -15,10 +15,12 @@ import java.util.Collections;
 public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final MgrAuthenticationProvider mgrAuthenticationProvider;
+    private final MgrAuthenticationEntryPoint mgrAuthenticationEntryPoint;
 
     @Autowired
-    public HttpSecurityConfig(MgrAuthenticationProvider mgrAuthenticationProvider) {
+    public HttpSecurityConfig(MgrAuthenticationProvider mgrAuthenticationProvider, MgrAuthenticationEntryPoint mgrAuthenticationEntryPoint) {
         this.mgrAuthenticationProvider = mgrAuthenticationProvider;
+        this.mgrAuthenticationEntryPoint = mgrAuthenticationEntryPoint;
     }
 
     @Override
@@ -40,8 +42,9 @@ public class HttpSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilterAt(
                         new MgrHttpBasicAuthenticationFilter(
-                                authenticationManager()),
+                                authenticationManager(), mgrAuthenticationEntryPoint),
                         BasicAuthenticationFilter.class
-                );
+                ).exceptionHandling()
+                .authenticationEntryPoint(mgrAuthenticationEntryPoint);
     }
 }

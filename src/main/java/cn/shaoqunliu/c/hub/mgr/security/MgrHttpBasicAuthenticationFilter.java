@@ -6,8 +6,11 @@ import com.alibaba.fastjson.JSONObject;
 import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -20,8 +23,8 @@ import java.util.Objects;
 
 public class MgrHttpBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
-    MgrHttpBasicAuthenticationFilter(AuthenticationManager authenticationManager) {
-        super(authenticationManager);
+    MgrHttpBasicAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint authenticationEntryPoint) {
+        super(authenticationManager, authenticationEntryPoint);
     }
 
     @Override
@@ -30,8 +33,8 @@ public class MgrHttpBasicAuthenticationFilter extends BasicAuthenticationFilter 
             String auth = request.getHeader("Authorization");
             String uri = request.getRequestURI();
             HttpMethod method = HttpMethod.resolve(request.getMethod());
-            Claims claims;
-            Object accessMap;
+            Claims claims = null;
+            Object accessMap = null;
             if (auth == null || !uri.startsWith("/v1/") ||
                     (claims = JwtsUtils.getClaimsFromToken(auth)) == null ||
                     !((accessMap = claims.get("access")) instanceof Map)) {
@@ -43,7 +46,7 @@ public class MgrHttpBasicAuthenticationFilter extends BasicAuthenticationFilter 
                     .toJavaObject(MgrAccessDetails.class);
             // check if the user has enough permissions to access the required resources
             MgrAuthenticationToken authenticationToken =
-                    new MgrAuthenticationToken(uri, method, accessDetails, request.getParameterMap());
+                    new MgrAuthenticationToken(uri, method, accessDetails);
             Authentication authResult = getAuthenticationManager()
                     .authenticate(authenticationToken);
             Objects.requireNonNull(authResult);
@@ -51,8 +54,6 @@ public class MgrHttpBasicAuthenticationFilter extends BasicAuthenticationFilter 
             SecurityContextHolder.getContext().setAuthentication(authResult);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
-            // fail commence
-            return;
         }
         chain.doFilter(request, response);
     }

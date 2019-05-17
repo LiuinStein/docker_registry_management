@@ -12,8 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 @Component
 public class MgrAuthenticationProvider implements AuthenticationProvider {
 
@@ -88,7 +86,7 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
             // for example: the URI: /v1/namespace/{NAMESPACE}
             // and the split result is String[4] { "", "v1", "namespace", "{NAMESPACE}" }
             String[] uriPart = authenticationToken.getUri().split("/");
-            ResourceType resourceType;
+            ResourceType resourceType = null;
             if (uriPart.length < 3 ||
                     (resourceType = ResourceType.resolve(uriPart[2])) == null) {
                 return null;
@@ -96,92 +94,170 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
             boolean authenticated;
             switch (resourceType) {
                 case NAMESPACE:
-                    authenticated = true; // for test use
-//                    // {METHOD} /v1/namespace/{RESOURCE}
-//                    authenticated = hasNamespacePermission(
-//                            uriPart.length == 3 ? null : uriPart[3],
-//                            authenticationToken.getHttpMethod(),
-//                            authenticationToken.getParameterMap(),
-//                            authenticationToken.getAccessDetails());
+                    authenticated = hasNamespacePermissions(
+                            uriPart.length == 3 ? null : uriPart[3],
+                            authenticationToken.getHttpMethod(),
+                            authenticationToken.getAccessDetails());
                     break;
                 case REPOSITORY:
-                    authenticated = true;
-//                    authenticated = hasRepositoryPermission(
-//                            new DockerImageIdentifier(uriPart[3]),
-//                            authenticationToken.getHttpMethod(),
-//                            authenticationToken.getAccessDetails());
+                    authenticated = hasRepositoryPermissions(
+                            new DockerImageIdentifier(
+                                    uriPart.length < 4 ? null : uriPart[3],
+                                    uriPart.length < 5 ? null : uriPart[4]
+                            ),
+                            authenticationToken.getHttpMethod(),
+                            authenticationToken.getAccessDetails()
+                    );
                     break;
                 case IMAGE:
+                    authenticated = hasImagePermissions(
+                            new DockerImageIdentifier(
+                                    uriPart.length < 4 ? null : uriPart[3],
+                                    uriPart.length < 5 ? null : uriPart[4]
+                            ),
+                            authenticationToken.getHttpMethod(),
+                            authenticationToken.getAccessDetails()
+                    );
+                    break;
                 case STAR:
-                case USER:
-                case PERMISSION:
+                    // anyone can star any repositories
                     authenticated = true;
+                    break;
+                case USER:
+                    authenticated = hasUserPermissions(
+                            authenticationToken.getHttpMethod(),
+                            authenticationToken.getAccessDetails());
+                    break;
+                case PERMISSION:
+                    authenticated = hasGrantOrRevokePermissions(
+                            new DockerImageIdentifier(
+                                    uriPart.length < 4 ? null : uriPart[3],
+                                    uriPart.length < 5 ? null : uriPart[4]
+                            ),
+                            authenticationToken.getHttpMethod(),
+                            authenticationToken.getAccessDetails()
+                    );
                     break;
                 default:
                     throw new BadCredentialsException("bad request resource type");
             }
             authenticationToken.setAuthenticated(authenticated);
-            // TODO: not to return null here
-            // null will cause HTTP OK returned
-            return authenticated ? authenticationToken : null;
+            if (authenticated) {
+                return authenticationToken;
+            }
         }
         return null;
     }
 
+    private boolean hasUserPermissions(HttpMethod method, MgrAccessDetails accessDetails) {
+        switch (method) {
+            case POST:
+                // sign up
+                return true;
+            case PATCH:
+                // change password
+            case PUT:
+                // update user info
+                return accessDetails.getUid() != null;
+            default:
+                return false;
+        }
+    }
 
-//    private boolean hasNamespacePermission(String namespace, HttpMethod method,
-//                                           Map<String, String[]> parameters,
-//                                           MgrAccessDetails accessDetails) {
-//        switch (method) {
-//            case POST:
-//                // add a new namespace
-//                return true;
-//            case DELETE:
-//                // delete a namespace, check if is the owner
-//                return accessDetails.getAuthorities().getOwnership()
-//                        .getNamespace().contains(namespace);
-//            case GET:
-//                // get a list of namespaces belongs to someone
-//                // when the namespace field equals to null
-//                return namespace == null ||
-//                        // get info of a specific namespace such as owner
-//                        accessDetails.getAuthorities().getOwnership()
-//                                .getNamespace().contains(namespace);
-//            default:
-//                return false;
-//        }
-//    }
-//
-//    private boolean hasRepositoryPermission(DockerImageIdentifier identifier, HttpMethod method, MgrAccessDetails accessDetails) {
-//        switch (method) {
-//            case GET:
-//                // check if is opened, and everybody can read infos of an opened repository
-//                return repositoryService.isOpened(identifier.getNamespace(),
-//                        identifier.getRepository()) ||
-//                        // check if have the pull/push permission
-//                        accessDetails.getAuthorities().getReadOnly()
-//                                .contains(identifier.getFullIdentifier()) ||
-//                        accessDetails.getAuthorities().getWritable()
-//                                .contains(identifier.getFullIdentifier()) ||
-//                        // check if is the owner
-//                        accessDetails.getAuthorities().getOwnership()
-//                                .getRepository()
-//                                .contains(identifier.getFullIdentifier());
-//            case PUT:
-//            case DELETE:
-//                // only the owner can update/delete the repository's info
-//                // such as repository descriptions and isOpened
-//                return accessDetails.getAuthorities().getOwnership()
-//                        .getRepository()
-//                        .contains(identifier.getFullIdentifier());
-//            case POST:
-//                // only the namespace owner can add a repository into this namespace
-//                return accessDetails.getAuthorities().getOwnership()
-//                        .getNamespace().contains(identifier.getNamespace());
-//            default:
-//                return false;
-//        }
-//    }
+    private boolean hasNamespacePermissions(String namespace, HttpMethod method, MgrAccessDetails accessDetails) {
+        switch (method) {
+            case POST:
+                // add a namespace
+            case GET:
+                // get info of a namespace
+                return accessDetails.getUid() != null;
+            case DELETE:
+                // delete a namespace, check if the owner
+                return checkNamespaceOwnership(namespace, accessDetails);
+            default:
+                return false;
+        }
+    }
+
+    private boolean hasRepositoryPermissions(DockerImageIdentifier identifier, HttpMethod method, MgrAccessDetails accessDetails) {
+        switch (method) {
+            case DELETE:
+                // delete a repository
+            case PUT:
+                // update info
+                // n-owner, r-owner
+                return checkRepositoryOwnership(identifier, accessDetails);
+            case GET:
+                if (identifier == null) {
+                    return false;
+                }
+                if (identifier.getNamespace() != null) {
+                    if (identifier.getRepository() != null) {
+                        // get info of a specific repository
+                        return repositoryService.isOpened(identifier) ||
+                                checkRepositoryOwnership(identifier, accessDetails);
+                    }
+                    // get a list of repositories within a specific namespace
+                    return checkNamespaceOwnership(identifier.getNamespace(), accessDetails);
+                }
+                // get public repositories by ...
+                return true;
+            case POST:
+                // add a repository
+            default:
+                return false;
+        }
+    }
+
+    private boolean hasImagePermissions(DockerImageIdentifier identifier, HttpMethod method, MgrAccessDetails accessDetails) {
+        switch (method) {
+            case GET:
+                // get images within a specific repository
+                return repositoryService.isOpened(identifier) ||
+                        checkRepositoryOwnership(identifier, accessDetails);
+            case DELETE:
+                // delete an image
+                return checkRepositoryOwnership(identifier, accessDetails);
+            default:
+                return false;
+        }
+    }
+
+    private boolean hasGrantOrRevokePermissions(DockerImageIdentifier identifier, HttpMethod method, MgrAccessDetails accessDetails) {
+        if (identifier == null || identifier.getNamespace() == null ||
+                identifier.getRepository() == null || accessDetails == null) {
+            return false;
+        }
+        switch (method) {
+            case PATCH:
+                // change owner of repository
+                return checkNamespaceOwnership(identifier.getNamespace(), accessDetails);
+            case PUT:
+            case GET:
+                return checkRepositoryOwnership(identifier, accessDetails);
+            default:
+                return false;
+        }
+    }
+
+    private boolean checkNamespaceOwnership(String namespace, MgrAccessDetails accessDetails) {
+        if (namespace == null || accessDetails == null) {
+            return false;
+        }
+        return accessDetails.getAuthorities().getOwnership()
+                .getNamespace().contains(namespace);
+    }
+
+    private boolean checkRepositoryOwnership(DockerImageIdentifier identifier, MgrAccessDetails accessDetails) {
+        if (identifier == null || identifier.getNamespace() == null ||
+                identifier.getRepository() == null || accessDetails == null) {
+            return false;
+        }
+        return checkNamespaceOwnership(identifier.getNamespace(), accessDetails) ||
+                accessDetails.getAuthorities().getOwnership()
+                        .getRepository()
+                        .contains(identifier.getFullRepositoryName());
+    }
 
     @Override
     public boolean supports(Class<?> aClass) {

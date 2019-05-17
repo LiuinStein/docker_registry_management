@@ -116,4 +116,17 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
         // delete repository info
         repositoryDetailsRepository.deleteById(repositoryBasic.getId());
     }
+
+    @Override
+    public boolean isOpened(DockerImageIdentifier identifier) {
+        if (identifier == null || identifier.getNamespace() == null ||
+                identifier.getRepository() == null) {
+            return false;
+        }
+        DockerRepositoryBasic basic = repositoryDetailsRepository
+                .getDockerRepositoryBasicByNamespaceNameAndName(
+                        identifier.getNamespace(), identifier.getRepository()
+                );
+        return basic != null && basic.getOpened();
+    }
 }

@@ -1,6 +1,7 @@
 package cn.shaoqunliu.c.hub.mgr.security;
 
 import io.jsonwebtoken.*;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,7 +41,7 @@ public class JwtsUtils {
             // the parseClaimsJws method will check if the Jwts valid automatically,
             // and throw some exceptions subclassed JwtException when invalid Jwts was given
             // such as SignatureException and ExpiredJwtException
-            return null;
+            throw new BadCredentialsException(e.getMessage());
         }
     }
 
