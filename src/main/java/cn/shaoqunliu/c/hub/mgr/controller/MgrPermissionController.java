@@ -71,7 +71,7 @@ public class MgrPermissionController {
         }
         String username = jsonObject.getString("username");
         Action action = Action.of(jsonObject.getString("action"));
-        if (action == Action.NULL || action == Action.PUSH) {
+        if (action == Action.PUSH) {
             throw new IllegalArgumentException("Bad action");
         }
         DockerImageIdentifier identifier = new DockerImageIdentifier(namespace, repository);

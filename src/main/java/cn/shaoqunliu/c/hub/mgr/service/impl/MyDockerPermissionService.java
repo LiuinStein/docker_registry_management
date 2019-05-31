@@ -62,8 +62,15 @@ public class MyDockerPermissionService implements DockerPermissionService {
     }
 
     @Override
+    @Transactional
     public void changeDockerPermissions(DockerImageIdentifier identifier, String username, Action action) throws ResourceNotFoundException {
         Objects.requireNonNull(identifier);
+        if (action == Action.NULL) {
+            // revoke permissions
+            permissionRepository.deleteByUserUsernameAndRepositoryNamespaceNameAndRepositoryName(
+                    username, identifier.getNamespace(), identifier.getRepository());
+            return;
+        }
         DockerRepositoryBasic repositoryBasic = repositoryDetailsRepository.getDockerRepositoryBasicByNamespaceNameAndName(
                 Objects.requireNonNull(identifier.getNamespace()),
                 Objects.requireNonNull(identifier.getRepository())
@@ -77,11 +84,16 @@ public class MyDockerPermissionService implements DockerPermissionService {
         if (user == null) {
             throw new ResourceNotFoundException("the user with username " + username + " is not exists");
         }
-        if (permissionRepository.existsByUserIdAndRepositoryId(
-                user.getId(), repositoryBasic.getId())) {
-            // not add twice
+        DockerPermission current = permissionRepository.getByUserIdAndRepositoryId(
+                user.getId(), repositoryBasic.getId()
+        );
+        if (current != null) {
+            // already exists, modify permissions
+            current.setAction(Objects.requireNonNull(action).value());
+            permissionRepository.save(current);
             return;
         }
+        // add permission record to database
         DockerRepository repository = new DockerRepository();
         repository.setId(repositoryBasic.getId());
         DockerPermission permission = new DockerPermission();

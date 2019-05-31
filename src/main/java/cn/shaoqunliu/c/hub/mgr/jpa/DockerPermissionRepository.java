@@ -12,5 +12,7 @@ public interface DockerPermissionRepository extends PagingAndSortingRepository<D
 
     Page<DockerPermissionBasic> findAllByRepositoryNamespaceNameAndRepositoryName(String namespace, String repository, Pageable pageable);
 
-    Boolean existsByUserIdAndRepositoryId(Integer uid, Integer repository);
+    DockerPermission getByUserIdAndRepositoryId(Integer uid, Integer rid);
+
+    void deleteByUserUsernameAndRepositoryNamespaceNameAndRepositoryName(String username, String namespace, String repository);
 }

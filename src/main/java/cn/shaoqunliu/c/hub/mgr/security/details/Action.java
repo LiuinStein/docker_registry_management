@@ -1,7 +1,7 @@
 package cn.shaoqunliu.c.hub.mgr.security.details;
 
 public enum Action {
-    NULL(0, ""),
+    NULL(0, "null"),
     PULL(1, "pull"),
     PUSH(2, "push"),
     BOTH(3, "pull,push");
@@ -29,6 +29,7 @@ public enum Action {
     public static Action of(String str) {
         switch (str.toLowerCase()) {
             case "":
+            case "null":
                 return Action.NULL;
             case "pull":
                 return Action.PULL;

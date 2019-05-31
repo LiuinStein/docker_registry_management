@@ -89,8 +89,9 @@ public class MyDockerRepositoryService implements DockerRepositoryService {
         }
         // never update stars
         newer.setStars(null);
-        // so as the owner
+        // so as the owner and id
         newer.setOwner(null);
+        newer.setId(null);
         return repositoryDetailsRepository.save(
                 ObjectCopyingUtils.copyNonNullProperties(current, newer)
         ).getId();
