@@ -22,4 +22,8 @@ public class SecurityContextHolderUtils {
     public static Integer getUid() {
         return Objects.requireNonNull(getAccessDetails().getUid());
     }
+
+    public static String getUsername() {
+        return Objects.requireNonNull(getAccessDetails().getUsername());
+    }
 }

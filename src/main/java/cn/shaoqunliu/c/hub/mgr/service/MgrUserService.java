@@ -12,4 +12,6 @@ public interface MgrUserService {
     Integer changeDockerClientPassword(int uid, String raw, String newer);
 
     Integer updateUserInfo(MgrUserInfo info);
+
+    MgrUserInfo getUserInfoByUsername(String username);
 }

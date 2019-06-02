@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface MgrUserRepository extends JpaRepository<MgrUser, Integer> {
 
     Boolean existsByUsernameOrEmail(String username, String email);
+
+    MgrUser getMgrUserByUsername(String username);
 }

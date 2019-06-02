@@ -159,6 +159,9 @@ public class MgrAuthenticationProvider implements AuthenticationProvider {
             case PUT:
                 // update user info
                 return accessDetails.getUid() != null;
+            case GET:
+                // get user info
+                return accessDetails.getUsername() != null;
             default:
                 return false;
         }

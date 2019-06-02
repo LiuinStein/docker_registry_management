@@ -91,4 +91,16 @@ public class MyMgrUserService implements MgrUserService {
                 current.get(), info
         )).getId();
     }
+
+    @Override
+    public MgrUserInfo getUserInfoByUsername(String username) {
+        MgrUser user = userRepository.getMgrUserByUsername(
+                Objects.requireNonNull(username)
+        );
+        if (user == null) {
+            return null;
+        }
+        Optional<MgrUserInfo> info = infoRepository.findById(user.getId());
+        return info.isEmpty() ? null : info.get();
+    }
 }

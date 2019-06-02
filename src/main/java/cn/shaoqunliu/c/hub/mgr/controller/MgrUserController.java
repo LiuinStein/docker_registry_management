@@ -1,6 +1,7 @@
 package cn.shaoqunliu.c.hub.mgr.controller;
 
 import cn.shaoqunliu.c.hub.mgr.exception.ResourceNeedCreatedAlreadyExistsException;
+import cn.shaoqunliu.c.hub.mgr.exception.ResourceNotFoundException;
 import cn.shaoqunliu.c.hub.mgr.po.MgrUser;
 import cn.shaoqunliu.c.hub.mgr.po.MgrUserInfo;
 import cn.shaoqunliu.c.hub.mgr.service.MgrUserService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.Objects;
 
 @Validated
@@ -80,5 +82,21 @@ public class MgrUserController {
             throw new BadCredentialsException("bad credentials");
         }
         return new RestfulResult(HttpStatus.ACCEPTED.value(), "user info updated");
+    }
+
+    @RequestMapping(value = {"/info", "/info/{username}"}, method = RequestMethod.GET, produces = {MediaType.APPLICATION_JSON_VALUE})
+    @ResponseStatus(HttpStatus.OK)
+    public RestfulResult getUserInfo(@PathVariable(value = "username", required = false)
+                                             String username) throws ResourceNotFoundException {
+        if (username == null || username.length() == 0) {
+            username = SecurityContextHolderUtils.getUsername();
+        }
+        MgrUserInfo info = userService.getUserInfoByUsername(username);
+        if (info == null) {
+            throw new ResourceNotFoundException("the user with name " + username + " was not found");
+        }
+        RestfulResult result = new RestfulResult(HttpStatus.OK.value(), "user info got");
+        result.addData("users", Collections.singletonList(info));
+        return result;
     }
 }
